@@ -1,0 +1,1 @@
+urxvt: perl hook 0 evaluation error: /usr/lib/urxvt/perl/tabbedex: Can't use a hash as a reference at /usr/lib/urxvt/perl/tabbedex line 354, <$fh> line 1.
