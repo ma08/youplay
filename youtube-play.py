@@ -103,6 +103,20 @@ def demo_menu():
     # Finally, we call show to show the menu and allow the user to interact
     menu.show()
 
+def paste(str, p=True, c=True):
+    from subprocess import Popen, PIPE
+
+    if p:
+        p = Popen(['xsel', '-pi'], stdin=PIPE)
+        p.communicate(input=str)
+    if c:
+        p = Popen(['xsel', '-bi'], stdin=PIPE)
+        p.communicate(input=str)
+
+# paste('Hello', False)    # pastes to CLIPBOARD only
+# paste('Hello', c=False)  # pastes to PRIMARY only
+# paste('Hello')           # pastes to both
+
 def process_input(user_input,results,menu):
     # inner_menu = CursesMenu(title +"   "+duration, "Subtitle")
     # format_lines=get_format_info(url)
@@ -128,6 +142,11 @@ def process_input(user_input,results,menu):
             menu.show()
         else:
             menu.show()
+    elif user_input == ord('y') and index!=len(results):
+        paste(results[index]["url"], False)    # pastes to CLIPBOARD only
+
+
+
     # menu.resume()
 
 
