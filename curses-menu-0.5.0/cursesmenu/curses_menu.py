@@ -81,6 +81,8 @@ class CursesMenu(object):
         """
         :rtype: MenuItem|None
         """
+        if self.items == []:
+            return None
         if self.items:
             return self.items[self.current_option]
         else:
@@ -395,10 +397,16 @@ class CursesMenu(object):
             self.select()
         elif user_input == ord("/"):
             self.go_to_search_box()
+        #elif user_input == ord("o"):
+            #self.download()
         elif not self.input_run is None:
             self.input_run(user_input, *self.input_run_args)
 
         return user_input
+
+    def download(sef, option):
+        pass
+
 
     def go_to(self, option):
         """
@@ -434,6 +442,9 @@ class CursesMenu(object):
         """
         Select the current item and run it
         """
+        #print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        #if(self.selected_item is None):
+        #    return
         self.selected_option = self.current_option
         self.selected_item.set_up()
         self.selected_item.action()

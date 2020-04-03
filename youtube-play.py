@@ -1,10 +1,13 @@
-#!/usr/bin/python
-
+#!/home/ma08/pro/repos/youplay/youvenv/bin/python
+import datetime
+from urlparse import parse_qs
+from urlparse import urlparse
+import re
+import unicodedata
 #install https://developers.google.com/api-client-library/python/ , youtube-dl and mplayer
-
 import sys
 import isodate
-sys.path.append("./curses-menu-0.5.0/")
+sys.path.append("/home/ma08/pro/repos/youplay/curses-menu-0.5.0/")
 
 # Import the necessary packages
 from cursesmenu import *
@@ -104,6 +107,8 @@ def demo_menu():
     menu.show()
 
 def paste(str, p=True, c=True):
+    print "ffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    #exit()
     from subprocess import Popen, PIPE
 
     if p:
@@ -118,32 +123,26 @@ def paste(str, p=True, c=True):
 # paste('Hello')           # pastes to both
 
 def process_input(user_input,results,menu):
-    # inner_menu = CursesMenu(title +"   "+duration, "Subtitle")
-    # format_lines=get_format_info(url)
-    # for format_line in format_lines:
-        # function_item = FunctionItem(format_line , play_video, [url])
-    # inner_menu.append_item(function_item)
-    # submenu_item = SubmenuItem(title +"   "+duration, inner_menu, menu)
-    # menu.append_item(submenu_item)
-    # menu.pause()
     index = menu.current_option
     if user_input == ord('i') and index!=len(results):
         if not "formats" in results[index]:
             format_lines=get_format_info(results[index]["url"])
             results[index]["formats"]=format_lines
         format_index = SelectionMenu.get_selection(results[index]["formats"],"Select format")
-        # f1=open('./testfile', 'w+')
-        # print >> f1, format_index
         if(format_index>=0 and format_index<len(results[index]["formats"])):
             selected_format=results[index]["formats"][format_index].split()[0]
-            # f1=open('./testfile', 'w+')
-            # print >> f1, results[index]["url"], selected_format
-            play_video(results[index]["url"],video_format=selected_format,open_terminal=True)
+            print results[index]
+            play_video(results[index]["url"],video_format=selected_format,open_terminal=True,video_name=results[index][u'snippet']['title'])
             menu.show()
         else:
             menu.show()
     elif user_input == ord('y') and index!=len(results):
         paste(results[index]["url"], False)    # pastes to CLIPBOARD only
+    elif user_input == ord('o'):
+        os.chdir('/home/ma08/pro/repos/youplay/downloads')
+        print "aaaaaaaaaaaaaa", len(results),index
+        os.system("urxvt -cd /home/ma08/pro/repos/youplay/downloads -e sh -c 'youtube-dl '"+results[index]["url"])
+
 
 
 
@@ -171,9 +170,7 @@ def process_query(menu,query):
         description=result["snippet"]["description"].encode('utf8')
         thumbnail_medium=result["snippet"]["thumbnails"]["medium"]["url"]
 
-        # function_item = FunctionItem(title +"   "+duration , get_selection_format, [])
-        function_item = FunctionItem(title +"   "+duration , play_video, [url])
-        # function_item = FunctionItem(title +"   "+duration , play_video, [url])
+        function_item = FunctionItem(title +"   "+duration , play_video, [url,title])
         menu.append_item(function_item)
 
     menu.event_change_args[0]=results #updating for thumbnails
@@ -184,73 +181,61 @@ def process_query(menu,query):
 
 
 def show_menu(results):
-    image_displayer=imgbackground.URXVTImageDisplayer()
-    print "here"
-    # Create the menu
-    event_args=[results,image_displayer]
-    process_input_args=[results]
-    menu = CursesMenu("Title", "Subtitle",event_change_run=draw_current_thumbnail,event_change_args=event_args,input_run=process_input,input_run_args=process_input_args,process_query=process_query)
-    event_args.append(menu)
-    process_input_args.append(menu)
+    try:
+        print "shooooooooooooooow meeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeenu"
+        image_displayer=imgbackground.URXVTImageDisplayer()
+        if(results==[]):
+            print "goo"
+            event_args=[results,image_displayer]
+            process_input_args=[results]
+            menu = CursesMenu("Title", "Subtitle",event_change_run=draw_current_thumbnail,event_change_args=event_args,input_run=process_input,input_run_args=process_input_args,process_query=process_query)
+            process_input_args.append(menu)
+            event_args.append(menu)
+            menu.show()
+            menu_item = MenuItem("Menu Item")
+            function_items = []
+            print "boo"
+            menu.show()
+            print "foo"
+            exit()
 
-    # Create some items
+        print "here"
+        # Create the menu
+        event_args=[results,image_displayer]
+        process_input_args=[results]
+        menu = CursesMenu("Title", "Subtitle",event_change_run=draw_current_thumbnail,event_change_args=event_args,input_run=process_input,input_run_args=process_input_args,process_query=process_query)
+        event_args.append(menu)
+        process_input_args.append(menu)
 
-    # MenuItem is the base class for all items, it doesn't do anything when selected
-    menu_item = MenuItem("Menu Item")
+        # Create some items
 
-    function_items = []
+        # MenuItem is the base class for all items, it doesn't do anything when selected
+        menu_item = MenuItem("Menu Item")
 
-    for result in results:
-        # print result
-        url = result["url"]
-        title=result["snippet"]["title"].encode('utf8')
-        duration=result["duration"].encode('utf8')
-        description=result["snippet"]["description"].encode('utf8')
-        thumbnail_medium=result["snippet"]["thumbnails"]["medium"]["url"]
+        function_items = []
 
-        # inner_menu = CursesMenu(title +"   "+duration, "Subtitle")
-        # format_lines=get_format_info(url)
-        # for format_line in format_lines:
-            # function_item = FunctionItem(format_line , play_video, [url])
-            # inner_menu.append_item(function_item)
-        # submenu_item = SubmenuItem(title +"   "+duration, inner_menu, menu)
-        # menu.append_item(submenu_item)
+        for result in results:
+            # print result
+            url = result["url"]
+            title=result["snippet"]["title"].encode('utf8')
+            duration=result["duration"].encode('utf8')
+            description=result["snippet"]["description"].encode('utf8')
+            thumbnail_medium=result["snippet"]["thumbnails"]["medium"]["url"]
 
-        # print title
-        # print description
+            function_item = FunctionItem(title +"   "+duration , play_video, [url, title])
+            menu.append_item(function_item)
+        menu.show()
 
-        # function_item = FunctionItem(title +"   "+duration , get_selection_format, [])
-        function_item = FunctionItem(title +"   "+duration , play_video, [url])
-        # function_item = FunctionItem(title +"   "+duration , play_video, [url])
-        menu.append_item(function_item)
-        # menu.append_item(submenu_item)
-        # function_items.append(function_item)
-
-    # # A FunctionItem runs a Python function when selected
-    # function_item = FunctionItem("Call a Python function", input, ["Enter an input"])
-
-    # # A CommandItem runs a console command
-    # command_item = CommandItem("Run a console command",  "touch hello.txt")
-
-    # # A SelectionMenu constructs a menu from a list of strings
-    # selection_menu = SelectionMenu(["item1", "item2", "item3"])
-
-    # # A SubmenuItem lets you add a menu (the selection_menu above, for example)
-    # # as a submenu of another menu
-    # submenu_item = SubmenuItem("Submenu item", selection_menu, menu)
-
-    # Finally, we call show to show the menu and allow the user to interact
-    menu.show()
+    except Exception as e:
+      print("An exception occurred") 
+      print e
 
 def draw_current_thumbnail(results,image_displayer,menu):
-    # menu = CursesMenu("Title", "Subtitle")
-    # image_displayer=imgbackground.URXVTImageDisplayer()
-    # print "aaaaaaaaaaa"
-    # sys.stdout.flush()
-    # f1=open('./testfile', 'w+')
-    # print >> f1, results
     #TODO eror here when results = []
     #possibly due to 0 results
+    if(results==[]):
+        return
+
     
     if(menu.current_option==len(menu.items)-1 or len(menu.items)==1):
         image_displayer.clear(0,0,320,180)
@@ -316,7 +301,55 @@ def get_format_info(url):
 
 
 
-def play_video(url,video_format=None,open_terminal=True):
+
+YOUTUBE_DOMAINS = [
+    'youtu.be',
+    'youtube.com',
+]
+
+
+def get_id(url_string):
+    # Make sure all URLs start with a valid scheme
+    if not url_string.lower().startswith('http'):
+        url_string = 'http://%s' % url_string
+
+    url = urlparse(url_string)
+
+    # Check host against whitelist of domains
+    if url.hostname.replace('www.', '') not in YOUTUBE_DOMAINS:
+        return None
+
+    # Video ID is usually to be found in 'v' query string
+    qs = parse_qs(url.query)
+    if 'v' in qs:
+        return qs['v'][0]
+
+    # Otherwise fall back to path component
+    return url.path.lstrip('/')
+
+def video_id(value):
+    """
+    Examples:
+    - http://youtu.be/SA2iWivDJiE
+    - http://www.youtube.com/watch?v=_oPAwA_Udwc&feature=feedu
+    - http://www.youtube.com/embed/SA2iWivDJiE
+    - http://www.youtube.com/v/SA2iWivDJiE?version=3&amp;hl=en_US
+    """
+    query = urlparse(value)
+    if query.hostname == 'youtu.be':
+        return query.path[1:]
+    if query.hostname in ('www.youtube.com', 'youtube.com'):
+        if query.path == '/watch':
+            p = parse_qs(query.query)
+            return p['v'][0]
+        if query.path[:7] == '/embed/':
+            return query.path.split('/')[2]
+        if query.path[:3] == '/v/':
+            return query.path.split('/')[2]
+    # fail?
+    return None
+
+def play_video(url,video_name="not set",video_format=None,open_terminal=True):
     # print(url)
     #p = subprocess.Popen(["youtube-dl","-F",url], stdout=subprocess.PIPE)
     #out = p.stdout.read()
@@ -324,12 +357,35 @@ def play_video(url,video_format=None,open_terminal=True):
     #x=raw_input()
     #os.system("urxvt -e sh -c 'youtube-dl -f %s -q -o- %s | mplayer -cache 8192 -' &"%(x,url))
     # os.system("youtube-dl -f 18 -q -o- %s | mpv --cache=512 --force-seekable=yes -"%(url))
+    print 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    print video_name
+    video_name2=video_name.replace(' ','_')
+    video_name2=video_name2.replace('(','_')
+    video_name2=video_name2.replace(')','_')
+    print video_name2
+    print "noooooooooooooosssssssssssssssssssssssssssssssssssssssssseeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    if(video_name2=="not_set"):
+        print 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+        #r = re.compile('(?:(?:https?\:\/\/)?(?:www\.)?(?:youtube|youtu)(?:(?:\.com|\.be)\/)(?:embed\/)?(?:watch\?)?(?:feature=player_embedded)?&?(?:v=)?([0-z]{11}|[0-z]{4}(?:\-|\_)[0-z]{4}|.(?:\-|\_)[0-z]{9}))')
+        #print r.match(url)
+        print video_id(url)
+        #video_name2=r.match(url)
+        #print video_name2
+    video_name2=video_name2[:28]
+        #sleep()
+        #video_name = query["v"][0]
+    #video_name=unicodedata.normalize('NFKD', video_name).encode('ascii','ignore')
+    #video_name='/home/ma08/pro/repos/youplay/downloads/'+str(datetime.datetime.now())
+    #vidoe_name=video_name[:10]
+    #print(type(video_name)),"naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaame", video_name
+    os.chdir('/home/ma08/pro/repos/youplay/downloads')
+    #video_name="foobar"
     if not video_format is None and open_terminal:
-        os.system("urxvt -e sh -c 'youtube-dl -f %s -q -o- %s | mpv --cache=auto --force-seekable=yes -' > debug.out 2> debug.out &"%(video_format,url))
+        os.system("urxvt -cd /home/ma08/pro/repos/youplay/downloads-e sh -c 'youtube-dl -f %s -q -o- %s | mpv --record-file=%s_video.ts --cache=auto --force-seekable=yes -' > debug.out 2> debug.out &"%(video_format,url,video_name2))
     elif open_terminal:
-        os.system("urxvt --hold -e sh -c 'youtube-dl  -q -o- %s | mpv --cache=auto --force-seekable=yes -' > debug.out 2> debug.out &"%(url))
+        os.system("urxvt -cd /home/ma08/pro/repos/youplay/downloads --hold -e sh -c 'youtube-dl  -q -o- %s | mpv --record-file=%s_video.ts --cache=auto --force-seekable=yes -' > debug.out 2> debug.out &"%(url,video_name2))
     else:
-        os.system("youtube-dl  -q -o- %s | mpv --cache=auto --force-seekable=yes -"%(url))
+        os.system("youtube-dl  -q -o- %s | mpv  --record-file=%s_video.ts --cache=auto --force-seekable=yes -"%(url,video_name2))
     # os.system("youtube-dl  -q -o  %s | mpv --cache=512 --force-seekable=yes -"%(url))
     # os.system("youtube-dl -f 18 -q -o- %s | mplayer -vo caca  -"%(url))
     #os.system("youtube-dl -f 18 -q -o- %s | mplayer -cache 8192 - &"%(url))
@@ -398,27 +454,36 @@ if __name__ == "__main__":
     # get_format_info("https://www.youtube.com/v/mA1LQRBA6es")
     # exit()
 
-    argparser.add_argument("--q", help="Search term", default="Google")
+    argparser.add_argument("--l", help="Lucky")
+    argparser.add_argument("--q", help="Search term")
     argparser.add_argument("--max-results", help="Max results", default=25)
     args = argparser.parse_args()
-    if(len(args.q.split())==1 and args.q.find("http")!=-1):
-        print("fooooo")
+    print "e"
+    print type(args)
+    print dir(args)
+    print args
+    print type(args.q)
+    print "grrrrrrrrr;w"
+    if(args.q is None and args.l is None): #empty
+        results = [{u'kind': u'youtube#searchResult', 'url': u'http://youtube.com/v/LRP8d7hhpoQ', u'snippet': {u'thumbnails': {u'default': {u'url': u'https://i.ytimg.com/vi/LRP8d7hhpoQ/default.jpg', u'width': 120, u'height': 90}, u'high': {u'url': u'https://i.ytimg.com/vi/LRP8d7hhpoQ/hqdefault.jpg', u'width': 480, u'height': 360}, u'medium': {u'url': u'https://i.ytimg.com/vi/LRP8d7hhpoQ/mqdefault.jpg', u'width': 320, 'id': u'LRP8d7hhpoQ', u'height': 180}}, u'title': u'[OFFICIAL VIDEO] Hallelujah - Pentatonix', u'channelId': u'UCmv1CLT6ZcFdTJMHxaR9XeA', u'publishedAt': u'2016-10-21T13:58:56.000Z', u'liveBroadcastContent': u'none', u'channelTitle': u'PTXofficial', u'description': u"NEW ALBUM 'THE BEST OF PENTATONIX CHRISTMAS' OUT NOW! BUY: https://smarturl.it/bestofPTXmas?IQid=yt STREAM: https://smarturl.it/bestofPTXmas?"}, u'etag': u'"Fznwjl6JEQdo1MGvHOGaz_YanRU/g6GiKsrBbph87ppcgVwd92XKiFQ"', 'duration': '05:06', u'id': {u'kind': u'youtube#video', u'videoId': u'LRP8d7hhpoQ'}}]
+        show_menu(results)
+    elif(args.q is not None and len(args.q.split())==1 and args.q.find("http")!=-1): #url as input
         print(args.q)
         play_video(args.q)
     else:
         try:
-            # urls = youtube_search(args)
-            #print urls
-            # print thumbnails
-
-            results, urls,thumbnails = youtube_search(args)
-            get_thumbnails(thumbnails)
-            show_menu(results)
-
-            # curses.wrapper(textbox_demo)
-            # draw_thumbnails(thumbnails[:5])
-            # time.sleep(100)
-            # play_video(urls[0])
-            # demo_menu()
+            if(args.l is None): #not i am lucky
+                results, urls,thumbnails = youtube_search(args)
+                get_thumbnails(thumbnails)
+                show_menu(results)
+            else: #i am lucky
+                args.q=args.l
+                results, urls,thumbnails = youtube_search(args)
+                print(len(urls),"leeeeeeeee")
+                print "ggggggggg", args.q,args.l
+                print urls
+                print results[0]
+                print type(results[0])
+                play_video(urls[0],video_name=results[0][u'snippet'][u'title'])
         except HttpError, e:
             print "An HTTP error %d occurred:\n%s" % (e.resp.status, e.content)
